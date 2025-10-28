@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Well Control Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1 data-translate-key="main_title">CapsuleCorp - Control Dashboard</h1>
+            <div class="status-display">
+                <strong data-translate-key="status_label">Status do Sistema:</strong>
+                <span id="systemStatus">--</span>
+            </div>
+            <div class="header-actions">
+                <div id="connection-status" class="disconnected">
+                    <span class="dot"></span>
+                    <span data-translate-key="connection_status">ESP32 CONNECTION</span>
+                </div>
+                <button id="wifiConfigBtn" class="action-btn" title="Configurar Wi-Fi">📶</button> 
+                <button id="toggleThemeBtn" class="action-btn">🌙</button>
+                <button id="toggleLangBtn" class="action-btn">🇧🇷</button>
+            </div>
+        </header>
+        <main class="main-grid">
+            <div class="card"><h2 data-translate-key="card_mode">Operating Mode</h2><p class="value" id="mode">--</p></div>
+            <div class="card"><h2 data-translate-key="card_motor_status">Motor Status</h2><p class="value" id="motorState">--</p></div>
+            <div class="card">
+                <h2 data-translate-key="card_pressure_status">Pressure Status</h2>
+                <div class="pressure-indicator-container">
+                    <span id="pressureIndicator" class="pressure-indicator"></span>
+                    <p id="pressureText" class="value-small"></p>
+                </div>
+            </div>
+            <div class="card"><h2 data-translate-key="card_flow_pulses">Flow (Pulses/s)</h2><p class="value" id="pulsos">--</p></div>
+            <div class="card"><h2 data-translate-key="card_flow_lpm">Flow (L/min)</h2><p class="value" id="lpm">--</p></div>
+            <div class="card"><h2 data-translate-key="card_total_volume">Total Volume (L)</h2><p class="value" id="volumeTotal">--</p></div>
+            <div class="card"><h2 data-translate-key="card_threshold">Minimum Threshold</h2><p class="value" id="minPulsos">--</p></div>
+            
+            <div id="chart-container-card" class="card full-width">
+                <h2 data-translate-key="card_history">Histórico de Consumo (Litros por Hora)</h2>
+                <canvas id="consumptionChart"></canvas>
+            </div>
+
+            <div class="card card-actions full-width">
+                <h2 data-translate-key="card_actions_title">Quick Actions & Settings</h2>
+                <div class="action-group">
+                    <button id="toggleModeBtn" data-translate-key="btn_switch_manual">Switch to Manual</button>
+                    <div id="manualControls" class="hidden"><button id="manualControlBtn" data-translate-key="btn_turn_on_motor">Turn On Motor</button></div>
+                    <div class="settings">
+                        <label for="minPulsosInput" data-translate-key="label_set_threshold">Set Pulse Threshold:</label>
+                        <div class="input-group">
+                            <input type="number" id="minPulsosInput" min="0" placeholder="Atual: --">
+                            <button id="saveThresholdBtn" data-translate-key="btn_save">Save</button>
+                        </div>
+                    </div>
+                    <div class="settings">
+                        <button id="toggleCooldownBtn" data-translate-key="btn_enable_cooldown">Habilitar Cooldown</button>
+                        <div id="cooldownSettings" class="hidden" style="margin-top: 10px;">
+                             <label for="cooldownTimeInput" data-translate-key="label_set_cooldown">Definir Tempo de Cooldown (segundos):</label>
+                             <div class="input-group">
+                                 <input type="number" id="cooldownTimeInput" min="1" placeholder="Ex: 180">
+                                 <button id="saveCooldownBtn" data-translate-key="btn_save">Salvar</button>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="settings">
+                        <label for="offDelayInput" data-translate-key="label_set_off_delay">Tempo para Desligar (sem fluxo, em seg):</label>
+                        <div class="input-group">
+                            <input type="number" id="offDelayInput" min="0" placeholder="Ex: 5">
+                            <button id="saveOffDelayBtn" data-translate-key="btn_save">Salvar</button>
+                        </div>
+                    </div>
+                    <div class="settings">
+                        <button id="toggleProtectionBtn" data-translate-key="btn_enable_protection">Habilitar Proteção Sem Pressão</button>
+                        <div id="protectionSettings" class="hidden" style="margin-top: 10px;">
+                             <label for="protectionTimeInput" data-translate-key="label_set_protection_time">Tempo de Proteção (sem pressão, em seg):</label>
+                             <div class="input-group">
+                                 <input type="number" id="protectionTimeInput" min="1" placeholder="Ex: 15">
+                                 <button id="saveProtectionTimeBtn" data-translate-key="btn_save">Salvar</button>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="settings">
+                        <label data-translate-key="label_logic_mode">Modo de Lógica Automática:</label>
+                        <div class="logic-mode-group">
+                            <input type="radio" id="logicMode0" name="logicMode" value="0"><label for="logicMode0" data-translate-key="logic_mode_0">Combinado</label>
+                            <input type="radio" id="logicMode1" name="logicMode" value="1"><label for="logicMode1" data-translate-key="logic_mode_1">Só Fluxo</label>
+                            <input type="radio" id="logicMode2" name="logicMode" value="2"><label for="logicMode2" data-translate-key="logic_mode_2">Só Pressão</label>
+                        </div>
+                    </div>
+                    <button id="resetTotalBtn" data-translate-key="btn_reset_volume">Reset Total Volume</button>
+                    <button id="resetHistoryBtn" data-translate-key="btn_reset_history" style="background-color: #f0ad4e;">Zerar Histórico de Consumo</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

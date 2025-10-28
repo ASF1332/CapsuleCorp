@@ -1,0 +1,40 @@
+; =================================================================
+; PlatformIO Project Configuration File for IoT-ASF
+; =================================================================
+
+[env:esp32dev]
+; --- Configurações Essenciais ---
+platform = espressif32
+board = esp32dev                ; ID da sua placa. 'esp32dev' é um genérico que funciona para a maioria.
+framework = arduino
+
+; --- Configurações do Monitor Serial ---
+monitor_speed = 115200
+
+; --- Gerenciamento de Bibliotecas ---
+; Adicione aqui as bibliotecas que seu projeto precisa.
+; O PlatformIO vai baixá-las e instalá-las automaticamente.
+lib_deps =
+    ; Para criar um servidor web assíncrono (muito mais eficiente que o padrão)
+    esphome/ESPAsyncWebServer-esphome @ ^3.1.0
+    
+    ; Para manipular dados em formato JSON (essencial para comunicação com a interface web)
+    bblanchon/ArduinoJson @ ^7.0.4
+    
+    ; Para gerenciar a conexão Wi-Fi de forma flexível
+    tzapu/WiFiManager @ ^2.0.16-rc2
+
+; --- Configuração do Sistema de Arquivos (para a pasta "data") ---
+; Esta linha diz ao PlatformIO para usar o sistema de arquivos LittleFS
+; e reconhecer a pasta "data" na raiz do projeto.
+board_build.filesystem = littlefs
+
+; --- Configuração para Upload pela Rede (OTA - Over-the-Air) ---
+; Descomente as duas linhas abaixo para habilitar o upload sem fio.
+; Você precisará ter o código para OTA no seu main.cpp.
+upload_protocol = espota
+upload_port = 192.168.50.172
+upload_flags = --auth=KaKaroto133200-
+
+; Alternativa com mDNS (mais avançado, mas não precisa saber o IP)
+; upload_port = capsulecorp.local
